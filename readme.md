@@ -1,69 +1,83 @@
-# Snowflake Natural Language Query Generator
+# Keshet Query Studio
 
-A Streamlit app that converts natural language questions into Snowflake SQL queries using OpenAI.
+A professional natural language to Snowflake SQL query tool built for Keshet Media Group.
+
+![Keshet Query Studio](https://img.shields.io/badge/Keshet-Query%20Studio-7c3aed)
 
 ## Features
 
-- Natural language to SQL conversion
-- Review generated queries before execution
-- Edit queries if needed
-- Execute against Snowflake and view results
-- Download results as CSV
-- Default filters: yesterday's data, limit 100 rows
+### Query Management
+- **Query History** — Automatically saves your queries for easy re-use
+- **Favorites** — Star your most-used queries for quick access
+- **Example Queries** — Click-to-run example queries to get started
+
+### Usability
+- **Natural Language Input** — Just describe what you want in plain English/Hebrew
+- **Query Explanation** — AI explains what each generated query does
+- **Auto-Fix** — If a query fails, the AI can attempt to fix it automatically
+- **SQL Editor** — Review and edit generated SQL before running
+
+### Results & Visualization
+- **Table/Chart Toggle** — Switch between table and chart views
+- **Preview Mode** — Preview first 10 rows before full execution
+- **Column Statistics** — View distinct counts, min/max, nulls for each column
+- **Export** — Download results as CSV or JSON
+
+### Safety & Control
+- **SELECT Only** — Only read queries allowed, no modifications to data
+- **Date Filter Required** — All queries must have a date range (default: yesterday)
+- **Adjustable Limit** — Control max rows returned (default: 100)
+- **Cost Warnings** — Alerts for queries that might scan too much data
 
 ## Setup
 
-### 1. Clone/Download this repository
+### 1. Clone this repository
 
 ### 2. Install dependencies
-
 ```bash
 pip install -r requirements.txt
 ```
 
 ### 3. Configure secrets
 
-**For local development:**
+**For Streamlit Cloud:**
 
-Create `.streamlit/secrets.toml`:
+Go to your app Settings → Secrets and add:
 
 ```toml
 OPENAI_API_KEY = "sk-your-openai-api-key"
 
 [snowflake]
-account = "your-account-identifier"
-user = "your-username"
-password = "your-password"
-warehouse = "your-warehouse"
-database = "mako_data_lake"
-schema = "public"
+account = "el66449.eu-central-1"
+user = "OmerY"
+database = "MAKO_DATA_LAKE"
+schema = "PUBLIC"
+warehouse = "COMPUTE_WH"
+role = "ACCOUNTADMIN"
+private_key = """-----BEGIN PRIVATE KEY-----
+YOUR PRIVATE KEY HERE
+-----END PRIVATE KEY-----"""
 ```
 
-**For Streamlit Cloud:**
-
-1. Push your code to GitHub (without secrets.toml!)
-2. Go to [share.streamlit.io](https://share.streamlit.io)
-3. Deploy your app
-4. Go to Settings → Secrets
-5. Add the same secrets in TOML format
-
-### 4. Run locally
-
-```bash
-streamlit run app.py
-```
+### 4. Deploy
+Push to GitHub and connect to Streamlit Cloud at [share.streamlit.io](https://share.streamlit.io)
 
 ## Usage
 
-1. Type your question in natural language (e.g., "How many unique users from Israel visited mako yesterday?")
-2. Click "Generate Query"
-3. Review the generated SQL
-4. Edit if needed
-5. Click "Execute" to run against Snowflake
-6. View/download results
+1. **Ask a question** — Type naturally, e.g., "How many users visited mako yesterday?"
+2. **Review the SQL** — Check the generated query and explanation
+3. **Preview** — Click "Preview" to see first 10 rows
+4. **Execute** — Run the full query
+5. **Analyze** — View results as table or chart, check column stats
+6. **Export** — Download as CSV or JSON
 
-## Notes
+## Tech Stack
 
-- Queries default to yesterday's data unless you specify a date
-- Results are limited to 100 rows unless you specify otherwise
-- The app fetches all table columns on startup, with detailed descriptions for 25 key columns
+- **Frontend**: Streamlit
+- **AI**: OpenAI GPT-4o-mini
+- **Database**: Snowflake
+- **Auth**: Snowflake Key-Pair Authentication
+
+---
+
+Built with ❤️ for Keshet Media Group
