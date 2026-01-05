@@ -13,7 +13,7 @@ import re
 
 TABLE_NAME = "mako_data_lake.public.combined_events_enriched"
 DEFAULT_LIMIT = 100
-APP_NAME = "Keshet Query Studio"
+APP_NAME = "Keshet Digital Query Studio"
 
 # Important columns with detailed descriptions
 IMPORTANT_COLUMNS = {
@@ -759,7 +759,7 @@ def render_header():
     """Render the app header."""
     st.markdown("""
     <div class="app-header">
-        <h1 class="app-title">Keshet Query Studio</h1>
+        <h1 class="app-title">Keshet Digital Query Studio</h1>
         <p class="app-subtitle">Transform natural language into Snowflake SQL queries</p>
     </div>
     """, unsafe_allow_html=True)
