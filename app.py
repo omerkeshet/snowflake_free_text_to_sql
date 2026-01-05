@@ -232,7 +232,7 @@ Rules:
     client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
     
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_question}
@@ -277,6 +277,10 @@ def main():
         height=100
     )
     
+    # Initialize generation counter
+    if "gen_counter" not in st.session_state:
+        st.session_state["gen_counter"] = 0
+    
     # Generate query button
     if st.button("🔍 Generate Query", type="primary"):
         if not user_question:
@@ -287,17 +291,19 @@ def main():
             schema_description = build_schema_description(all_columns)
             sql = generate_sql(user_question, schema_description)
             st.session_state["generated_sql"] = sql
+            st.session_state["gen_counter"] += 1  # Force widget refresh
+            st.rerun()
     
     # Display generated SQL
     if "generated_sql" in st.session_state:
         st.subheader("Generated SQL")
         
-        # Editable SQL
+        # Editable SQL - key changes with each generation to reset the widget
         edited_sql = st.text_area(
             "Review and edit if needed:",
             value=st.session_state["generated_sql"],
             height=200,
-            key="sql_editor"
+            key=f"sql_editor_{st.session_state['gen_counter']}"
         )
         
         # Execute button
