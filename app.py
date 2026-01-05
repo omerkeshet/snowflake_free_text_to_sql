@@ -165,50 +165,48 @@ def apply_custom_css():
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
     
     :root {
-        --keshet-blue: #1e3a8a;
-        --keshet-purple: #7c3aed;
-        --keshet-pink: #ec4899;
-        --keshet-orange: #f97316;
-        --keshet-yellow: #eab308;
-        --keshet-green: #22c55e;
-        --keshet-cyan: #06b6d4;
-        --bg-primary: #fafbfc;
+        --keshet-blue: #6b7fa3;
+        --keshet-purple: #9b8ec4;
+        --keshet-pink: #c9a9bc;
+        --keshet-orange: #d4a574;
+        --keshet-yellow: #d4c874;
+        --keshet-green: #7eb89a;
+        --keshet-cyan: #7eb8c4;
+        --bg-primary: #f8f9fb;
         --bg-secondary: #ffffff;
-        --text-primary: #1e293b;
-        --text-secondary: #64748b;
-        --border-color: #e2e8f0;
-        --success: #10b981;
-        --warning: #f59e0b;
-        --error: #ef4444;
+        --text-primary: #3d4a5c;
+        --text-secondary: #8895a7;
+        --border-color: #e8ecf1;
+        --success: #7eb89a;
+        --warning: #d4b574;
+        --error: #c98a8a;
     }
     
     .stApp {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        background: #f5f7fa;
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
     
     /* Header */
     .app-header {
-        background: linear-gradient(135deg, var(--keshet-blue) 0%, var(--keshet-purple) 50%, var(--keshet-pink) 100%);
+        background: linear-gradient(135deg, #8b9dc3 0%, #a89bc4 50%, #c4a9b8 100%);
         padding: 2rem 2.5rem;
-        border-radius: 16px;
+        border-radius: 12px;
         margin-bottom: 2rem;
-        box-shadow: 0 10px 40px rgba(124, 58, 237, 0.2);
+        box-shadow: 0 4px 20px rgba(139, 157, 195, 0.15);
     }
     
     .app-title {
         color: white;
-        font-size: 2rem;
-        font-weight: 700;
+        font-size: 1.75rem;
+        font-weight: 600;
         margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 12px;
+        letter-spacing: -0.5px;
     }
     
     .app-subtitle {
-        color: rgba(255,255,255,0.85);
-        font-size: 1rem;
+        color: rgba(255,255,255,0.8);
+        font-size: 0.95rem;
         font-weight: 400;
         margin-top: 0.5rem;
     }
@@ -216,10 +214,10 @@ def apply_custom_css():
     /* Cards */
     .card {
         background: var(--bg-secondary);
-        border-radius: 12px;
+        border-radius: 10px;
         padding: 1.5rem;
         border: 1px solid var(--border-color);
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
         margin-bottom: 1rem;
     }
     
@@ -243,7 +241,7 @@ def apply_custom_css():
     .sql-editor {
         font-family: 'JetBrains Mono', monospace;
         font-size: 0.9rem;
-        background: #1e293b;
+        background: #2d3748;
         color: #e2e8f0;
         border-radius: 8px;
         padding: 1rem;
@@ -253,37 +251,35 @@ def apply_custom_css():
     /* Example chips */
     .example-chip {
         display: inline-block;
-        background: linear-gradient(135deg, #ede9fe 0%, #fce7f3 100%);
-        color: var(--keshet-purple);
+        background: #f0f1f5;
+        color: #5a6578;
         padding: 0.5rem 1rem;
-        border-radius: 20px;
+        border-radius: 6px;
         font-size: 0.85rem;
         margin: 0.25rem;
         cursor: pointer;
-        border: 1px solid #ddd6fe;
+        border: 1px solid #e2e6ec;
         transition: all 0.2s ease;
     }
     
     .example-chip:hover {
-        background: linear-gradient(135deg, var(--keshet-purple) 0%, var(--keshet-pink) 100%);
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        background: #e8eaef;
+        border-color: #c9ced8;
     }
     
     /* Stats */
     .stat-box {
         background: var(--bg-secondary);
-        border-radius: 10px;
+        border-radius: 8px;
         padding: 1rem 1.25rem;
         border: 1px solid var(--border-color);
         text-align: center;
     }
     
     .stat-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--keshet-purple);
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #6b7fa3;
     }
     
     .stat-label {
@@ -296,28 +292,27 @@ def apply_custom_css():
     /* Buttons */
     .stButton > button {
         font-family: 'Plus Jakarta Sans', sans-serif;
-        font-weight: 600;
-        border-radius: 8px;
+        font-weight: 500;
+        border-radius: 6px;
         padding: 0.5rem 1.5rem;
         transition: all 0.2s ease;
     }
     
     .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, var(--keshet-purple) 0%, var(--keshet-pink) 100%);
+        background: linear-gradient(135deg, #8b9dc3 0%, #a89bc4 100%);
         border: none;
         color: white;
     }
     
     .stButton > button[kind="primary"]:hover {
-        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
-        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(139, 157, 195, 0.3);
     }
     
     /* History items */
     .history-item {
         background: var(--bg-secondary);
         border: 1px solid var(--border-color);
-        border-radius: 8px;
+        border-radius: 6px;
         padding: 0.75rem 1rem;
         margin-bottom: 0.5rem;
         cursor: pointer;
@@ -325,8 +320,8 @@ def apply_custom_css():
     }
     
     .history-item:hover {
-        border-color: var(--keshet-purple);
-        box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
+        border-color: #b8c4d8;
+        box-shadow: 0 2px 6px rgba(139, 157, 195, 0.1);
     }
     
     .history-question {
@@ -350,37 +345,34 @@ def apply_custom_css():
         gap: 8px;
         background: var(--bg-primary);
         padding: 4px;
-        border-radius: 10px;
+        border-radius: 8px;
     }
     
     .stTabs [data-baseweb="tab"] {
-        border-radius: 8px;
+        border-radius: 6px;
         font-weight: 500;
     }
     
     /* Explanation box */
     .explanation-box {
-        background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 100%);
-        border: 1px solid #fcd34d;
-        border-radius: 10px;
+        background: #f5f3f0;
+        border: 1px solid #e5e0d8;
+        border-radius: 8px;
         padding: 1rem;
         margin-top: 1rem;
     }
     
     .explanation-title {
         font-weight: 600;
-        color: #92400e;
+        color: #6b6358;
         margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 8px;
     }
     
     /* Cost estimation */
     .cost-box {
-        background: #f0fdf4;
-        border: 1px solid #86efac;
-        border-radius: 8px;
+        background: #f0f5f2;
+        border: 1px solid #c8d8ce;
+        border-radius: 6px;
         padding: 0.75rem 1rem;
         display: flex;
         align-items: center;
@@ -388,8 +380,8 @@ def apply_custom_css():
     }
     
     .cost-warning {
-        background: #fef3c7;
-        border-color: #fcd34d;
+        background: #f8f5ed;
+        border-color: #e5dcc8;
     }
     
     /* Toggle buttons */
@@ -398,13 +390,13 @@ def apply_custom_css():
         gap: 4px;
         background: var(--bg-primary);
         padding: 4px;
-        border-radius: 8px;
+        border-radius: 6px;
         width: fit-content;
     }
     
     .toggle-btn {
         padding: 6px 16px;
-        border-radius: 6px;
+        border-radius: 4px;
         border: none;
         cursor: pointer;
         font-weight: 500;
@@ -413,7 +405,7 @@ def apply_custom_css():
     }
     
     .toggle-btn.active {
-        background: var(--keshet-purple);
+        background: #8b9dc3;
         color: white;
     }
     
@@ -429,19 +421,19 @@ def apply_custom_css():
     
     /* Error message styling */
     .error-box {
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        border-radius: 10px;
+        background: #faf5f5;
+        border: 1px solid #e5d0d0;
+        border-radius: 8px;
         padding: 1rem;
-        color: #991b1b;
+        color: #7a5a5a;
     }
     
     .success-box {
-        background: #f0fdf4;
-        border: 1px solid #86efac;
-        border-radius: 10px;
+        background: #f5faf7;
+        border: 1px solid #c8d8ce;
+        border-radius: 8px;
         padding: 1rem;
-        color: #166534;
+        color: #4a6a5a;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -691,9 +683,7 @@ def render_header():
     """Render the app header."""
     st.markdown("""
     <div class="app-header">
-        <h1 class="app-title">
-            <span>📊</span> Keshet Query Studio
-        </h1>
+        <h1 class="app-title">Keshet Query Studio</h1>
         <p class="app-subtitle">Transform natural language into Snowflake SQL queries</p>
     </div>
     """, unsafe_allow_html=True)
@@ -701,7 +691,7 @@ def render_header():
 
 def render_example_queries():
     """Render clickable example queries."""
-    st.markdown("##### 💡 Try an example")
+    st.markdown("##### Try an example")
     cols = st.columns(4)
     for i, example in enumerate(EXAMPLE_QUERIES):
         with cols[i % 4]:
@@ -713,7 +703,7 @@ def render_example_queries():
 def render_sidebar():
     """Render the sidebar with history and favorites."""
     with st.sidebar:
-        st.markdown("### ⚙️ Settings")
+        st.markdown("### Settings")
         
         # Limit selector
         limit = st.slider("Max rows", min_value=10, max_value=1000, value=DEFAULT_LIMIT, step=10)
@@ -722,44 +712,44 @@ def render_sidebar():
         st.markdown("---")
         
         # Query History
-        st.markdown("### 📜 Query History")
+        st.markdown("### Query History")
         if "query_history" in st.session_state and st.session_state["query_history"]:
             for i, item in enumerate(reversed(st.session_state["query_history"][-10:])):
                 with st.container():
                     col1, col2 = st.columns([4, 1])
                     with col1:
-                        if st.button(f"🕐 {item['question'][:35]}...", key=f"hist_{i}", use_container_width=True):
+                        if st.button(f"{item['question'][:35]}...", key=f"hist_{i}", use_container_width=True):
                             st.session_state["user_question"] = item["question"]
                             st.session_state["generated_sql"] = item["sql"]
                             st.session_state["sql_explanation"] = item.get("explanation", "")
                             st.session_state["gen_counter"] = st.session_state.get("gen_counter", 0) + 1
                             st.rerun()
                     with col2:
-                        if st.button("⭐", key=f"fav_{i}"):
+                        if st.button("★", key=f"fav_{i}"):
                             if "favorites" not in st.session_state:
                                 st.session_state["favorites"] = []
                             if item not in st.session_state["favorites"]:
                                 st.session_state["favorites"].append(item)
-                                st.toast("Added to favorites!")
+                                st.toast("Added to favorites")
         else:
             st.caption("No queries yet")
         
         st.markdown("---")
         
         # Favorites
-        st.markdown("### ⭐ Favorites")
+        st.markdown("### Favorites")
         if "favorites" in st.session_state and st.session_state["favorites"]:
             for i, item in enumerate(st.session_state["favorites"]):
                 col1, col2 = st.columns([4, 1])
                 with col1:
-                    if st.button(f"⭐ {item['question'][:35]}...", key=f"favitem_{i}", use_container_width=True):
+                    if st.button(f"{item['question'][:35]}...", key=f"favitem_{i}", use_container_width=True):
                         st.session_state["user_question"] = item["question"]
                         st.session_state["generated_sql"] = item["sql"]
                         st.session_state["sql_explanation"] = item.get("explanation", "")
                         st.session_state["gen_counter"] = st.session_state.get("gen_counter", 0) + 1
                         st.rerun()
                 with col2:
-                    if st.button("🗑️", key=f"delfav_{i}"):
+                    if st.button("×", key=f"delfav_{i}"):
                         st.session_state["favorites"].remove(item)
                         st.rerun()
         else:
@@ -771,18 +761,17 @@ def render_cost_estimation(cost_info: dict):
     warnings = []
     
     if not cost_info.get("has_date_filter"):
-        warnings.append("⚠️ No date filter detected - query may scan large amounts of data")
+        warnings.append("No date filter detected — query may scan large amounts of data")
     
     if not cost_info.get("has_limit"):
-        warnings.append("⚠️ No LIMIT clause - may return many rows")
+        warnings.append("No LIMIT clause — may return many rows")
     
     if cost_info.get("estimated_rows") and cost_info["estimated_rows"] > 10000:
-        warnings.append(f"⚠️ Estimated {cost_info['estimated_rows']:,} rows")
+        warnings.append(f"Estimated {cost_info['estimated_rows']:,} rows")
     
     if warnings:
         st.markdown(f"""
         <div class="cost-box cost-warning">
-            <span>⚡</span>
             <div>
                 <strong>Query Warnings</strong><br/>
                 {"<br/>".join(warnings)}
@@ -792,15 +781,14 @@ def render_cost_estimation(cost_info: dict):
     else:
         st.markdown("""
         <div class="cost-box">
-            <span>✅</span>
-            <div><strong>Query looks good!</strong> Date filter and limit detected.</div>
+            <div><strong>Query validated</strong> — Date filter and limit detected.</div>
         </div>
         """, unsafe_allow_html=True)
 
 
 def render_column_stats(stats: dict):
     """Render column statistics in an expander."""
-    with st.expander("📊 Column Statistics"):
+    with st.expander("Column Statistics"):
         stat_df = []
         for col, col_stats in stats.items():
             row = {
@@ -857,7 +845,7 @@ def render_visualization(df: pd.DataFrame):
 def main():
     st.set_page_config(
         page_title=APP_NAME,
-        page_icon="📊",
+        page_icon="◇",
         layout="wide",
         initial_sidebar_state="expanded"
     )
@@ -915,7 +903,7 @@ def main():
     st.markdown("<br/>", unsafe_allow_html=True)
     
     # Main query input
-    st.markdown("##### 🔍 Ask a question about your data")
+    st.markdown("##### Ask a question about your data")
     user_question = st.text_area(
         "Enter your question",
         value=st.session_state.get("user_question", ""),
@@ -927,7 +915,7 @@ def main():
     
     col1, col2 = st.columns([1, 5])
     with col1:
-        generate_btn = st.button("🚀 Generate Query", type="primary", use_container_width=True)
+        generate_btn = st.button("Generate Query", type="primary", use_container_width=True)
     
     # Generate query
     if generate_btn and user_question:
@@ -938,7 +926,7 @@ def main():
             # Validate safety
             is_safe, safety_msg = validate_sql_safety(sql)
             if not is_safe:
-                st.error(f"🚫 {safety_msg}")
+                st.error(f"{safety_msg}")
                 return
             
             st.session_state["generated_sql"] = sql
@@ -950,14 +938,14 @@ def main():
     # Display generated SQL
     if "generated_sql" in st.session_state and st.session_state["generated_sql"]:
         st.markdown("---")
-        st.markdown("##### 📝 Generated SQL")
+        st.markdown("##### Generated SQL")
         
         # Explanation
         if "sql_explanation" in st.session_state and st.session_state["sql_explanation"]:
             st.markdown(f"""
             <div class="explanation-box">
-                <div class="explanation-title">💡 Query Explanation</div>
-                <p style="margin:0; color: #78350f;">{st.session_state["sql_explanation"]}</p>
+                <div class="explanation-title">Query Explanation</div>
+                <p style="margin:0; color: #6b6358;">{st.session_state["sql_explanation"]}</p>
             </div>
             """, unsafe_allow_html=True)
         
@@ -981,11 +969,11 @@ def main():
         # Preview and Execute buttons
         col1, col2, col3, col4 = st.columns([1, 1, 1, 3])
         with col1:
-            preview_btn = st.button("👁️ Preview (10 rows)", use_container_width=True)
+            preview_btn = st.button("Preview (10 rows)", use_container_width=True)
         with col2:
-            execute_btn = st.button("▶️ Execute", type="primary", use_container_width=True)
+            execute_btn = st.button("Execute", type="primary", use_container_width=True)
         with col3:
-            if st.button("🗑️ Clear", use_container_width=True):
+            if st.button("Clear", use_container_width=True):
                 for key in ["generated_sql", "sql_explanation", "query_results", "current_question"]:
                     if key in st.session_state:
                         del st.session_state[key]
@@ -1001,7 +989,7 @@ def main():
             with st.spinner("Running preview..."):
                 try:
                     df = execute_query(preview_sql)
-                    st.markdown("##### 👁️ Preview Results (first 10 rows)")
+                    st.markdown("##### Preview Results (first 10 rows)")
                     st.dataframe(df, use_container_width=True, hide_index=True)
                 except Exception as e:
                     st.error(f"Preview failed: {e}")
@@ -1031,7 +1019,7 @@ def main():
                         st.error(f"Query execution failed: {e}")
                         
                         # Offer to fix
-                        if st.button("🔧 Try to fix automatically"):
+                        if st.button("Try to fix automatically"):
                             with st.spinner("Attempting to fix query..."):
                                 schema_description = build_schema_description(all_columns)
                                 fixed_sql, fix_explanation = fix_failed_query(
@@ -1054,7 +1042,7 @@ def main():
             # Results header with stats
             col1, col2, col3 = st.columns([2, 1, 1])
             with col1:
-                st.markdown(f"##### 📊 Results ({len(df):,} rows)")
+                st.markdown(f"##### Results ({len(df):,} rows)")
             with col2:
                 view_mode = st.radio("View", ["Table", "Chart"], horizontal=True, label_visibility="collapsed")
             
@@ -1074,7 +1062,7 @@ def main():
             with col1:
                 csv = df.to_csv(index=False)
                 st.download_button(
-                    label="📥 Download CSV",
+                    label="Download CSV",
                     data=csv,
                     file_name="query_results.csv",
                     mime="text/csv",
@@ -1083,7 +1071,7 @@ def main():
             with col2:
                 json_data = df.to_json(orient="records", indent=2)
                 st.download_button(
-                    label="📥 Download JSON",
+                    label="Download JSON",
                     data=json_data,
                     file_name="query_results.json",
                     mime="application/json",
