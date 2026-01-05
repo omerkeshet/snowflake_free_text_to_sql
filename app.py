@@ -582,6 +582,7 @@ BUSINESS RULES AND DATA RELATIONSHIPS:
    - action = 'start' indicates video play started
    - action = 'complete' indicates video was watched to completion
    - To calculate completion rate: COUNT(action='complete') / COUNT(action='start')
+   - To calculate the play duration for each play_id you need to sum play_time_from_last_event across the play_id
 
 5. SITES:
    - SITE values: 'mako', 'n12', '12plus', 'v1'
