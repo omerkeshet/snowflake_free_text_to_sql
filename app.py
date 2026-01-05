@@ -13,7 +13,7 @@ import re
 
 TABLE_NAME = "mako_data_lake.public.combined_events_enriched"
 DEFAULT_LIMIT = 100
-APP_NAME = "Keshet Digital Query Studio"
+APP_NAME = "Keshet Query Studio"
 
 # Important columns with detailed descriptions
 IMPORTANT_COLUMNS = {
@@ -562,6 +562,33 @@ def generate_sql(user_question: str, schema_description: str, limit: int) -> Tup
     """Generate SQL and explanation from natural language using OpenAI."""
     yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     
+    # Business rules and data relationships
+    business_rules = """
+BUSINESS RULES AND DATA RELATIONSHIPS:
+
+1. AD TYPES AND SUB-TYPES:
+   - type = 'video' includes sub_types: preroll, midroll, video_paused_ad, native, bumper, 
+   - type = 'display' includes sub_types: cube, article, monster, jambo, parallax, standard, full_screen, prime, banner, ozen, poster, inboard, coast2coast
+   - When querying for a specific ad format (e.g., "native ads"), always filter by BOTH type AND sub_type
+
+2. VISIT COUNTING:
+   - Use COUNT(DISTINCT calculated_visit_id) for visit counts
+
+3. USER COUNTING:
+   - user_id is device-dependent, meaning the same person on different devices will have different user_ids
+   - For unique user counts, use COUNT(DISTINCT user_id)
+
+4. VIDEO PLAY ANALYSIS:
+   - play_id stays constant for an entire video viewing session
+   - action = 'start' indicates video play started
+   - action = 'complete' indicates video was watched to completion
+   - To calculate completion rate: COUNT(action='complete') / COUNT(action='start')
+
+5. SITES:
+   - SITE values: 'mako', 'n12', '12plus', 'v1'
+   - These are different properties/brands under Keshet Media Group
+"""
+    
     system_prompt = f"""You are a Snowflake SQL expert. Generate SQL queries based on natural language questions.
 
 Table: {TABLE_NAME}
@@ -569,16 +596,17 @@ Table: {TABLE_NAME}
 Schema:
 {schema_description}
 
-Rules:
+{business_rules}
+
+QUERY RULES:
 1. Always use the exact table name: {TABLE_NAME}
 2. CRITICAL: Always filter by a date range. Default to date = '{yesterday}' (yesterday) unless the user specifies a different date range. Every query MUST have a date filter.
 3. Always add LIMIT {limit} at the end unless the user specifies a different limit
 4. Use ONLY SELECT statements. Never use INSERT, UPDATE, DELETE, DROP, CREATE, ALTER, or any other modifying statements.
 5. Use valid Snowflake SQL syntax
 6. Column names are case-insensitive in Snowflake but preserve the case as shown in the schema
-7. When counting visits, use SUM(visit_first_event) or COUNT with visit_first_event = 1
-8. When analyzing sessions, use calculated_visit_id as the session identifier
-9. IMPORTANT: Format the SQL query with proper line breaks for readability:
+7. Apply the business rules above when constructing queries
+8. IMPORTANT: Format the SQL query with proper line breaks for readability:
    - SELECT clause on its own line(s)
    - FROM clause on its own line
    - WHERE clause on its own line
@@ -624,12 +652,42 @@ def fix_failed_query(original_question: str, failed_sql: str, error_message: str
     """Attempt to fix a failed query."""
     yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     
+    # Business rules and data relationships
+    business_rules = """
+BUSINESS RULES AND DATA RELATIONSHIPS:
+
+1. AD TYPES AND SUB-TYPES:
+   - type = 'video' includes sub_types: preroll, midroll, video_paused_ad
+   - type = 'display' includes sub_types: cube, article, monster, jambo, native, parallax, standard, full_screen, prime, banner, ozen, poster, inboard, coast2coast
+   - When querying for a specific ad format (e.g., "native ads"), always filter by BOTH type AND sub_type
+
+2. VISIT COUNTING:
+   - To count visits/sessions, use: SUM(visit_first_event) or COUNT(*) WHERE visit_first_event = 1
+   - Do NOT use COUNT(DISTINCT calculated_visit_id) for visit counts, use visit_first_event instead
+
+3. USER COUNTING:
+   - user_id is device-dependent, meaning the same person on different devices will have different user_ids
+   - For unique user counts, use COUNT(DISTINCT user_id)
+
+4. VIDEO PLAY ANALYSIS:
+   - play_id stays constant for an entire video viewing session
+   - action = 'start' indicates video play started
+   - action = 'complete' indicates video was watched to completion
+   - To calculate completion rate: COUNT(action='complete') / COUNT(action='start')
+
+5. SITES:
+   - SITE values: 'mako', 'n12', '12plus', 'v1'
+   - These are different properties/brands under Keshet Media Group
+"""
+    
     system_prompt = f"""You are a Snowflake SQL expert. A query failed and you need to fix it.
 
 Table: {TABLE_NAME}
 
 Schema:
 {schema_description}
+
+{business_rules}
 
 Original question: {original_question}
 
@@ -645,7 +703,8 @@ Rules:
 3. Always include a date filter (default: date = '{yesterday}')
 4. Always add LIMIT {limit}
 5. Use ONLY SELECT statements
-6. Format the SQL query with proper line breaks:
+6. Apply the business rules above
+7. Format the SQL query with proper line breaks:
    - SELECT clause on its own line(s)
    - FROM clause on its own line
    - WHERE clause on its own line
@@ -700,7 +759,7 @@ def render_header():
     """Render the app header."""
     st.markdown("""
     <div class="app-header">
-        <h1 class="app-title">Keshet Digital Query Studio</h1>
+        <h1 class="app-title">Keshet Query Studio</h1>
         <p class="app-subtitle">Transform natural language into Snowflake SQL queries</p>
     </div>
     """, unsafe_allow_html=True)
