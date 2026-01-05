@@ -143,14 +143,33 @@ IMPORTANT_COLUMNS = {
 
 @st.cache_resource
 def get_snowflake_connection():
-    """Create a Snowflake connection."""
+    """Create a Snowflake connection using key-pair authentication."""
+    from cryptography.hazmat.backends import default_backend
+    from cryptography.hazmat.primitives import serialization
+    
+    # Load private key
+    private_key_pem = st.secrets["snowflake"]["private_key"]
+    private_key = serialization.load_pem_private_key(
+        private_key_pem.encode(),
+        password=None,
+        backend=default_backend()
+    )
+    
+    # Get the private key bytes in the format Snowflake expects
+    private_key_bytes = private_key.private_bytes(
+        encoding=serialization.Encoding.DER,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption()
+    )
+    
     return snowflake.connector.connect(
         account=st.secrets["snowflake"]["account"],
         user=st.secrets["snowflake"]["user"],
-        password=st.secrets["snowflake"]["password"],
+        private_key=private_key_bytes,
         warehouse=st.secrets["snowflake"]["warehouse"],
         database=st.secrets["snowflake"]["database"],
-        schema=st.secrets["snowflake"]["schema"]
+        schema=st.secrets["snowflake"]["schema"],
+        role=st.secrets["snowflake"]["role"]
     )
 
 
