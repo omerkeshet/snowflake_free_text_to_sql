@@ -13,7 +13,7 @@ import re
 
 TABLE_NAME = "mako_data_lake.public.combined_events_enriched"
 DEFAULT_LIMIT = 100
-APP_NAME = "Keshet Query Studio"
+APP_NAME = "Keshet Digital Query Studio"
 
 # Important columns with detailed descriptions
 IMPORTANT_COLUMNS = {
@@ -500,35 +500,27 @@ def execute_query(sql: str) -> pd.DataFrame:
 
 
 def estimate_query_cost(sql: str) -> dict:
-    """Estimate query cost/size before execution."""
-    try:
-        conn = get_snowflake_connection()
-        cursor = conn.cursor()
-        
-        # Use EXPLAIN to get query plan
-        cursor.execute(f"EXPLAIN {sql}")
-        plan = cursor.fetchall()
-        cursor.close()
-        
-        # Parse plan for estimates
-        plan_text = str(plan)
-        
-        # Extract estimated rows if available
-        rows_match = re.search(r'rows[=:]?\s*(\d+)', plan_text.lower())
-        estimated_rows = int(rows_match.group(1)) if rows_match else None
-        
-        return {
-            "estimated_rows": estimated_rows,
-            "has_date_filter": "date" in sql.lower(),
-            "has_limit": "limit" in sql.lower()
-        }
-    except Exception as e:
-        return {
-            "estimated_rows": None,
-            "has_date_filter": "date" in sql.lower(),
-            "has_limit": "limit" in sql.lower(),
-            "error": str(e)
-        }
+    """Estimate query cost/size before execution based on SQL analysis."""
+    sql_lower = sql.lower()
+    
+    # Check for date filter
+    has_date_filter = any(pattern in sql_lower for pattern in [
+        "date =", "date=", "date >", "date<", "date >", "date <",
+        "where date", "and date", "between"
+    ])
+    
+    # Check for LIMIT
+    has_limit = "limit" in sql_lower
+    
+    # Extract limit value if present
+    limit_match = re.search(r'limit\s+(\d+)', sql_lower)
+    limit_value = int(limit_match.group(1)) if limit_match else None
+    
+    return {
+        "has_date_filter": has_date_filter,
+        "has_limit": has_limit,
+        "limit_value": limit_value
+    }
 
 
 def get_column_stats(df: pd.DataFrame) -> dict:
@@ -586,10 +578,28 @@ Rules:
 6. Column names are case-insensitive in Snowflake but preserve the case as shown in the schema
 7. When counting visits, use SUM(visit_first_event) or COUNT with visit_first_event = 1
 8. When analyzing sessions, use calculated_visit_id as the session identifier
+9. IMPORTANT: Format the SQL query with proper line breaks for readability:
+   - SELECT clause on its own line(s)
+   - FROM clause on its own line
+   - WHERE clause on its own line
+   - GROUP BY on its own line (if used)
+   - ORDER BY on its own line (if used)
+   - LIMIT on its own line
+
+Example format:
+SELECT 
+    column1,
+    column2,
+    COUNT(*) as count
+FROM table_name
+WHERE date = '2024-01-01'
+GROUP BY column1, column2
+ORDER BY count DESC
+LIMIT 100
 
 Respond in JSON format:
 {{
-    "sql": "YOUR SQL QUERY HERE",
+    "sql": "YOUR SQL QUERY HERE with proper newlines using \\n",
     "explanation": "A brief, clear explanation of what this query does and why you structured it this way"
 }}
 """
@@ -635,10 +645,17 @@ Rules:
 3. Always include a date filter (default: date = '{yesterday}')
 4. Always add LIMIT {limit}
 5. Use ONLY SELECT statements
+6. Format the SQL query with proper line breaks:
+   - SELECT clause on its own line(s)
+   - FROM clause on its own line
+   - WHERE clause on its own line
+   - GROUP BY on its own line (if used)
+   - ORDER BY on its own line (if used)
+   - LIMIT on its own line
 
 Respond in JSON format:
 {{
-    "sql": "YOUR FIXED SQL QUERY HERE",
+    "sql": "YOUR FIXED SQL QUERY HERE with proper newlines using \\n",
     "explanation": "What was wrong and how you fixed it"
 }}
 """
@@ -696,7 +713,8 @@ def render_example_queries():
     for i, example in enumerate(EXAMPLE_QUERIES):
         with cols[i % 4]:
             if st.button(example[:40] + "..." if len(example) > 40 else example, key=f"example_{i}", use_container_width=True):
-                st.session_state["user_question"] = example
+                st.session_state["selected_example"] = example
+                st.session_state["auto_generate"] = True
                 st.rerun()
 
 
@@ -765,23 +783,23 @@ def render_cost_estimation(cost_info: dict):
     
     if not cost_info.get("has_limit"):
         warnings.append("No LIMIT clause — may return many rows")
-    
-    if cost_info.get("estimated_rows") and cost_info["estimated_rows"] > 10000:
-        warnings.append(f"Estimated {cost_info['estimated_rows']:,} rows")
+    elif cost_info.get("limit_value") and cost_info["limit_value"] > 500:
+        warnings.append(f"Large LIMIT ({cost_info['limit_value']} rows) — consider reducing for faster results")
     
     if warnings:
+        warning_html = "<br/>• ".join(warnings)
         st.markdown(f"""
         <div class="cost-box cost-warning">
             <div>
-                <strong>Query Warnings</strong><br/>
-                {"<br/>".join(warnings)}
+                <strong>Query Warnings</strong><br/>• {warning_html}
             </div>
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.markdown("""
+        limit_info = f" (LIMIT {cost_info['limit_value']})" if cost_info.get('limit_value') else ""
+        st.markdown(f"""
         <div class="cost-box">
-            <div><strong>Query validated</strong> — Date filter and limit detected.</div>
+            <div><strong>Query validated</strong> — Date filter and limit{limit_info} detected.</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -870,13 +888,13 @@ def main():
         st.error("Could not fetch table schema. Please check your Snowflake connection.")
         return
     
-    # Info bar
+    # Info bar - show table name, default date, and row limit
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown(f"""
         <div class="stat-box">
-            <div class="stat-value">{len(all_columns)}</div>
-            <div class="stat-label">Columns</div>
+            <div class="stat-value" style="font-size: 1rem;">combined_events_enriched</div>
+            <div class="stat-label">Available Table</div>
         </div>
         """, unsafe_allow_html=True)
     with col2:
@@ -884,14 +902,14 @@ def main():
         st.markdown(f"""
         <div class="stat-box">
             <div class="stat-value">{yesterday}</div>
-            <div class="stat-label">Default Date</div>
+            <div class="stat-label">Default Query Date</div>
         </div>
         """, unsafe_allow_html=True)
     with col3:
         st.markdown(f"""
         <div class="stat-box">
             <div class="stat-value">{st.session_state["query_limit"]}</div>
-            <div class="stat-label">Row Limit</div>
+            <div class="stat-label">Default Query Row Limit</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -904,21 +922,34 @@ def main():
     
     # Main query input
     st.markdown("##### Ask a question about your data")
+    
+    # Get default value from session state if example was selected
+    default_value = st.session_state.get("selected_example", "")
+    
     user_question = st.text_area(
         "Enter your question",
-        value=st.session_state.get("user_question", ""),
+        value=default_value,
         placeholder="e.g., How many unique users visited mako from mobile devices yesterday?",
         height=100,
         label_visibility="collapsed",
         key="question_input"
     )
     
+    # Check if we should auto-generate (from example click)
+    auto_generate = st.session_state.get("auto_generate", False)
+    
+    # Clear selected example and auto_generate flag after they've been used
+    if "selected_example" in st.session_state:
+        del st.session_state["selected_example"]
+    if "auto_generate" in st.session_state:
+        del st.session_state["auto_generate"]
+    
     col1, col2 = st.columns([1, 5])
     with col1:
         generate_btn = st.button("Generate Query", type="primary", use_container_width=True)
     
-    # Generate query
-    if generate_btn and user_question:
+    # Generate query (either from button or auto-generate from example)
+    if (generate_btn or auto_generate) and user_question:
         with st.spinner("Generating SQL..."):
             schema_description = build_schema_description(all_columns)
             sql, explanation = generate_sql(user_question, schema_description, st.session_state["query_limit"])
@@ -952,6 +983,7 @@ def main():
         st.markdown("<br/>", unsafe_allow_html=True)
         
         # Cost estimation
+        st.markdown("##### Query Validation")
         cost_info = estimate_query_cost(st.session_state["generated_sql"])
         render_cost_estimation(cost_info)
         
