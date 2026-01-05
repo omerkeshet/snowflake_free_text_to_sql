@@ -145,9 +145,8 @@ IMPORTANT_COLUMNS = {
 }
 
 EXAMPLE_QUERIES = [
-    "How many unique users visited mako yesterday?",
+    "How many unique users visited mako in the last 5 days?",
     "What's the breakdown of events by device type?",
-    "Show me the top 10 most active users by event count",
     "What percentage of visits came from Israel vs abroad?",
     "How many video plays started vs completed?",
     "What are the top referral sources?",
@@ -768,10 +767,10 @@ def render_header():
 def render_example_queries():
     """Render clickable example queries."""
     st.markdown("##### Try an example")
-    cols = st.columns(4)
+    cols = st.columns(2)
     for i, example in enumerate(EXAMPLE_QUERIES):
-        with cols[i % 4]:
-            if st.button(example[:40] + "..." if len(example) > 40 else example, key=f"example_{i}", use_container_width=True):
+        with cols[i % 2]:
+            if st.button(example[:35] + "..." if len(example) > 35 else example, key=f"example_{i}", use_container_width=True):
                 st.session_state["selected_example"] = example
                 st.session_state["auto_generate"] = True
                 st.rerun()
@@ -947,227 +946,247 @@ def main():
         st.error("Could not fetch table schema. Please check your Snowflake connection.")
         return
     
-    # Info bar - show table name, default date, and row limit
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown(f"""
-        <div class="stat-box">
-            <div class="stat-value" style="font-size: 1rem;">combined_events_enriched</div>
-            <div class="stat-label">Available Table</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-        st.markdown(f"""
-        <div class="stat-box">
-            <div class="stat-value">{yesterday}</div>
-            <div class="stat-label">Default Query Date</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with col3:
-        st.markdown(f"""
-        <div class="stat-box">
-            <div class="stat-value">{st.session_state["query_limit"]}</div>
-            <div class="stat-label">Default Query Row Limit</div>
-        </div>
-        """, unsafe_allow_html=True)
+    # ==========================================================================
+    # SPLIT SCREEN LAYOUT
+    # ==========================================================================
+    left_col, right_col = st.columns([1, 1], gap="large")
     
-    st.markdown("<br/>", unsafe_allow_html=True)
-    
-    # Example queries
-    render_example_queries()
-    
-    st.markdown("<br/>", unsafe_allow_html=True)
-    
-    # Main query input
-    st.markdown("##### Ask a question about your data")
-    
-    # Get default value from session state if example was selected
-    default_value = st.session_state.get("selected_example", "")
-    
-    user_question = st.text_area(
-        "Enter your question",
-        value=default_value,
-        placeholder="e.g., How many unique users visited mako from mobile devices yesterday?",
-        height=100,
-        label_visibility="collapsed",
-        key="question_input"
-    )
-    
-    # Check if we should auto-generate (from example click)
-    auto_generate = st.session_state.get("auto_generate", False)
-    
-    # Clear selected example and auto_generate flag after they've been used
-    if "selected_example" in st.session_state:
-        del st.session_state["selected_example"]
-    if "auto_generate" in st.session_state:
-        del st.session_state["auto_generate"]
-    
-    col1, col2 = st.columns([1, 5])
-    with col1:
-        generate_btn = st.button("Generate Query", type="primary", use_container_width=True)
-    
-    # Generate query (either from button or auto-generate from example)
-    if (generate_btn or auto_generate) and user_question:
-        with st.spinner("Generating SQL..."):
-            schema_description = build_schema_description(all_columns)
-            sql, explanation = generate_sql(user_question, schema_description, st.session_state["query_limit"])
-            
-            # Validate safety
-            is_safe, safety_msg = validate_sql_safety(sql)
-            if not is_safe:
-                st.error(f"{safety_msg}")
-                return
-            
-            st.session_state["generated_sql"] = sql
-            st.session_state["sql_explanation"] = explanation
-            st.session_state["current_question"] = user_question
-            st.session_state["gen_counter"] += 1
-            st.rerun()
-    
-    # Display generated SQL
-    if "generated_sql" in st.session_state and st.session_state["generated_sql"]:
-        st.markdown("---")
-        st.markdown("##### Generated SQL")
-        
-        # Explanation
-        if "sql_explanation" in st.session_state and st.session_state["sql_explanation"]:
+    # ==========================================================================
+    # LEFT SIDE - Input Section
+    # ==========================================================================
+    with left_col:
+        # Info bar - show table name, default date, and row limit
+        info_col1, info_col2, info_col3 = st.columns(3)
+        with info_col1:
             st.markdown(f"""
-            <div class="explanation-box">
-                <div class="explanation-title">Query Explanation</div>
-                <p style="margin:0; color: #6b6358;">{st.session_state["sql_explanation"]}</p>
+            <div class="stat-box">
+                <div class="stat-value" style="font-size: 0.9rem;">combined_events_enriched</div>
+                <div class="stat-label">Available Table</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with info_col2:
+            yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+            st.markdown(f"""
+            <div class="stat-box">
+                <div class="stat-value" style="font-size: 0.9rem;">{yesterday}</div>
+                <div class="stat-label">Default Query Date</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with info_col3:
+            st.markdown(f"""
+            <div class="stat-box">
+                <div class="stat-value" style="font-size: 0.9rem;">{st.session_state["query_limit"]}</div>
+                <div class="stat-label">Default Query Row Limit</div>
             </div>
             """, unsafe_allow_html=True)
         
         st.markdown("<br/>", unsafe_allow_html=True)
         
-        # Cost estimation
-        st.markdown("##### Query Validation")
-        cost_info = estimate_query_cost(st.session_state["generated_sql"])
-        render_cost_estimation(cost_info)
+        # Example queries
+        render_example_queries()
         
         st.markdown("<br/>", unsafe_allow_html=True)
         
-        # SQL editor
-        edited_sql = st.text_area(
-            "SQL Query (editable)",
-            value=st.session_state["generated_sql"],
-            height=200,
-            key=f"sql_editor_{st.session_state['gen_counter']}",
-            label_visibility="collapsed"
+        # Main query input
+        st.markdown("##### Ask a question about your data")
+        
+        # Get default value from session state if example was selected
+        default_value = st.session_state.get("selected_example", "")
+        
+        user_question = st.text_area(
+            "Enter your question",
+            value=default_value,
+            placeholder="e.g., How many unique users visited mako from mobile devices yesterday?",
+            height=120,
+            label_visibility="collapsed",
+            key="question_input"
         )
         
-        # Preview and Execute buttons
-        col1, col2, col3, col4 = st.columns([1, 1, 1, 3])
-        with col1:
-            preview_btn = st.button("Preview (10 rows)", use_container_width=True)
-        with col2:
-            execute_btn = st.button("Execute", type="primary", use_container_width=True)
-        with col3:
-            if st.button("Clear", use_container_width=True):
-                for key in ["generated_sql", "sql_explanation", "query_results", "current_question"]:
-                    if key in st.session_state:
-                        del st.session_state[key]
-                st.rerun()
+        # Check if we should auto-generate (from example click)
+        auto_generate = st.session_state.get("auto_generate", False)
         
-        # Preview execution
-        if preview_btn:
-            # Add LIMIT 10 for preview
-            preview_sql = re.sub(r'LIMIT\s+\d+', 'LIMIT 10', edited_sql, flags=re.IGNORECASE)
-            if 'LIMIT' not in preview_sql.upper():
-                preview_sql = preview_sql.rstrip(';') + ' LIMIT 10'
-            
-            with st.spinner("Running preview..."):
-                try:
-                    df = execute_query(preview_sql)
-                    st.markdown("##### Preview Results (first 10 rows)")
-                    st.dataframe(df, use_container_width=True, hide_index=True)
-                except Exception as e:
-                    st.error(f"Preview failed: {e}")
+        # Clear selected example and auto_generate flag after they've been used
+        if "selected_example" in st.session_state:
+            del st.session_state["selected_example"]
+        if "auto_generate" in st.session_state:
+            del st.session_state["auto_generate"]
         
-        # Full execution
-        if execute_btn:
-            # Validate again before execution
-            is_safe, safety_msg = validate_sql_safety(edited_sql)
-            if not is_safe:
-                st.error(f"🚫 {safety_msg}")
-            else:
-                with st.spinner("Executing query..."):
-                    try:
-                        df = execute_query(edited_sql)
-                        st.session_state["query_results"] = df
-                        
-                        # Add to history
-                        history_item = {
-                            "question": st.session_state.get("current_question", user_question),
-                            "sql": edited_sql,
-                            "explanation": st.session_state.get("sql_explanation", ""),
-                            "timestamp": datetime.now().isoformat()
-                        }
-                        st.session_state["query_history"].append(history_item)
-                        
-                    except Exception as e:
-                        st.error(f"Query execution failed: {e}")
-                        
-                        # Offer to fix
-                        if st.button("Try to fix automatically"):
-                            with st.spinner("Attempting to fix query..."):
-                                schema_description = build_schema_description(all_columns)
-                                fixed_sql, fix_explanation = fix_failed_query(
-                                    st.session_state.get("current_question", user_question),
-                                    edited_sql,
-                                    str(e),
-                                    schema_description,
-                                    st.session_state["query_limit"]
-                                )
-                                st.session_state["generated_sql"] = fixed_sql
-                                st.session_state["sql_explanation"] = fix_explanation
-                                st.session_state["gen_counter"] += 1
-                                st.rerun()
+        generate_btn = st.button("Generate Query", type="primary", use_container_width=True)
         
-        # Display results
-        if "query_results" in st.session_state:
-            st.markdown("---")
-            df = st.session_state["query_results"]
+        # Generate query (either from button or auto-generate from example)
+        if (generate_btn or auto_generate) and user_question:
+            with st.spinner("Generating SQL..."):
+                schema_description = build_schema_description(all_columns)
+                sql, explanation = generate_sql(user_question, schema_description, st.session_state["query_limit"])
+                
+                # Validate safety
+                is_safe, safety_msg = validate_sql_safety(sql)
+                if not is_safe:
+                    st.error(f"{safety_msg}")
+                else:
+                    st.session_state["generated_sql"] = sql
+                    st.session_state["sql_explanation"] = explanation
+                    st.session_state["current_question"] = user_question
+                    st.session_state["gen_counter"] += 1
+                    st.rerun()
+    
+    # ==========================================================================
+    # RIGHT SIDE - Results Section
+    # ==========================================================================
+    with right_col:
+        if "generated_sql" in st.session_state and st.session_state["generated_sql"]:
+            # Explanation
+            if "sql_explanation" in st.session_state and st.session_state["sql_explanation"]:
+                st.markdown(f"""
+                <div class="explanation-box">
+                    <div class="explanation-title">Query Explanation</div>
+                    <p style="margin:0; color: #6b6358;">{st.session_state["sql_explanation"]}</p>
+                </div>
+                """, unsafe_allow_html=True)
             
-            # Results header with stats
-            col1, col2, col3 = st.columns([2, 1, 1])
-            with col1:
-                st.markdown(f"##### Results ({len(df):,} rows)")
-            with col2:
-                view_mode = st.radio("View", ["Table", "Chart"], horizontal=True, label_visibility="collapsed")
-            
-            # Column stats
-            stats = get_column_stats(df)
-            render_column_stats(stats)
-            
-            # Results display
-            if view_mode == "Table":
-                st.dataframe(df, use_container_width=True, hide_index=True)
-            else:
-                render_visualization(df)
-            
-            # Export options
             st.markdown("<br/>", unsafe_allow_html=True)
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                csv = df.to_csv(index=False)
-                st.download_button(
-                    label="Download CSV",
-                    data=csv,
-                    file_name="query_results.csv",
-                    mime="text/csv",
-                    use_container_width=True
-                )
-            with col2:
-                json_data = df.to_json(orient="records", indent=2)
-                st.download_button(
-                    label="Download JSON",
-                    data=json_data,
-                    file_name="query_results.json",
-                    mime="application/json",
-                    use_container_width=True
-                )
+            
+            # Cost estimation / Query Validation
+            st.markdown("##### Query Validation")
+            cost_info = estimate_query_cost(st.session_state["generated_sql"])
+            render_cost_estimation(cost_info)
+            
+            st.markdown("<br/>", unsafe_allow_html=True)
+            
+            # SQL editor
+            st.markdown("##### Generated SQL")
+            edited_sql = st.text_area(
+                "SQL Query (editable)",
+                value=st.session_state["generated_sql"],
+                height=180,
+                key=f"sql_editor_{st.session_state['gen_counter']}",
+                label_visibility="collapsed"
+            )
+            
+            # Preview and Execute buttons
+            btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 1])
+            with btn_col1:
+                preview_btn = st.button("Preview (10 rows)", use_container_width=True)
+            with btn_col2:
+                execute_btn = st.button("Execute", type="primary", use_container_width=True)
+            with btn_col3:
+                if st.button("Clear", use_container_width=True):
+                    for key in ["generated_sql", "sql_explanation", "query_results", "current_question"]:
+                        if key in st.session_state:
+                            del st.session_state[key]
+                    st.rerun()
+            
+            # Preview execution
+            if preview_btn:
+                preview_sql = re.sub(r'LIMIT\s+\d+', 'LIMIT 10', edited_sql, flags=re.IGNORECASE)
+                if 'LIMIT' not in preview_sql.upper():
+                    preview_sql = preview_sql.rstrip(';') + ' LIMIT 10'
+                
+                with st.spinner("Running preview..."):
+                    try:
+                        df = execute_query(preview_sql)
+                        st.markdown("##### Preview Results (first 10 rows)")
+                        st.dataframe(df, use_container_width=True, hide_index=True, height=200)
+                    except Exception as e:
+                        st.error(f"Preview failed: {e}")
+            
+            # Full execution
+            if execute_btn:
+                is_safe, safety_msg = validate_sql_safety(edited_sql)
+                if not is_safe:
+                    st.error(f"{safety_msg}")
+                else:
+                    with st.spinner("Executing query..."):
+                        try:
+                            df = execute_query(edited_sql)
+                            st.session_state["query_results"] = df
+                            
+                            # Add to history
+                            history_item = {
+                                "question": st.session_state.get("current_question", user_question),
+                                "sql": edited_sql,
+                                "explanation": st.session_state.get("sql_explanation", ""),
+                                "timestamp": datetime.now().isoformat()
+                            }
+                            st.session_state["query_history"].append(history_item)
+                            
+                        except Exception as e:
+                            st.error(f"Query execution failed: {e}")
+                            
+                            if st.button("Try to fix automatically"):
+                                with st.spinner("Attempting to fix query..."):
+                                    schema_description = build_schema_description(all_columns)
+                                    fixed_sql, fix_explanation = fix_failed_query(
+                                        st.session_state.get("current_question", user_question),
+                                        edited_sql,
+                                        str(e),
+                                        schema_description,
+                                        st.session_state["query_limit"]
+                                    )
+                                    st.session_state["generated_sql"] = fixed_sql
+                                    st.session_state["sql_explanation"] = fix_explanation
+                                    st.session_state["gen_counter"] += 1
+                                    st.rerun()
+            
+            # Display results
+            if "query_results" in st.session_state:
+                st.markdown("---")
+                df = st.session_state["query_results"]
+                
+                # Results header with stats
+                res_col1, res_col2 = st.columns([2, 1])
+                with res_col1:
+                    st.markdown(f"##### Results ({len(df):,} rows)")
+                with res_col2:
+                    view_mode = st.radio("View", ["Table", "Chart"], horizontal=True, label_visibility="collapsed")
+                
+                # Column stats
+                stats = get_column_stats(df)
+                render_column_stats(stats)
+                
+                # Results display
+                if view_mode == "Table":
+                    st.dataframe(df, use_container_width=True, hide_index=True, height=300)
+                else:
+                    render_visualization(df)
+                
+                # Export options
+                exp_col1, exp_col2 = st.columns(2)
+                with exp_col1:
+                    csv = df.to_csv(index=False)
+                    st.download_button(
+                        label="Download CSV",
+                        data=csv,
+                        file_name="query_results.csv",
+                        mime="text/csv",
+                        use_container_width=True
+                    )
+                with exp_col2:
+                    json_data = df.to_json(orient="records", indent=2)
+                    st.download_button(
+                        label="Download JSON",
+                        data=json_data,
+                        file_name="query_results.json",
+                        mime="application/json",
+                        use_container_width=True
+                    )
+        else:
+            # Empty state for right side
+            st.markdown("""
+            <div style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 400px;
+                color: #8895a7;
+                text-align: center;
+            ">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">◇</div>
+                <div style="font-size: 1.1rem; font-weight: 500;">No query generated yet</div>
+                <div style="font-size: 0.9rem; margin-top: 0.5rem;">Ask a question or select an example to get started</div>
+            </div>
+            """, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
