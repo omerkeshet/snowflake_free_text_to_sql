@@ -700,7 +700,7 @@ def render_header():
     """Render the app header."""
     st.markdown("""
     <div class="app-header">
-        <h1 class="app-title">Keshet Query Studio</h1>
+        <h1 class="app-title">Keshet Digital Query Studio</h1>
         <p class="app-subtitle">Transform natural language into Snowflake SQL queries</p>
     </div>
     """, unsafe_allow_html=True)
